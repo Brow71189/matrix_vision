@@ -38,7 +38,8 @@ class AcquisitionThread(threading.Thread):
         if image_result is not None:
             buf = image_result.get_buffer()
             imgdata = np.array(buf, copy=False)
-
+            if imgdata.dtype.names is not None:
+                imgdata = np.moveaxis(np.array([imgdata[n] for n in imgdata.dtype.names]), 0, -1)
             info=image_result.info
             timestamp = info['timeStamp_us']
             frameNr = info['frameNr']

@@ -17,3 +17,9 @@ def get_camera_with_index(index):
     dev_dict = dev_list[index]
     dev_dict['camera'] = mv.dmg.get_device(dev_dict['serial'])
     return dev_dict
+
+def apply_default_settings(device):
+    device.Setting.Base.ImageDestination.PixelFormat = 10
+    device.Setting.Base.ImageProcessing.WhiteBalance = 6
+    device.Setting.Base.ImageProcessing.WhiteBalanceCalibration = 0
+    
