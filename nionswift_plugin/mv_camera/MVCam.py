@@ -21,12 +21,12 @@ class VideoCamera:
 
     def __init__(self, camera_index):
         self.camera_index = camera_index
-        self.device = connect_camera.get_camera_with_index(camera_index)
+        self.device = connect_camera.get_camera_with_index(camera_index)['camera']
 
     def update_settings(self, settings: dict) -> None:
         camera_index = settings.get("camera_index", 0)
         if camera_index != self.camera_index:
-            self.device = connect_camera.get_camera_with_index(camera_index)
+            self.device = connect_camera.get_camera_with_index(camera_index)['camera']
             self.camera_index = camera_index
 
     def start_acquisition(self):
@@ -43,7 +43,7 @@ class VideoCamera:
     def acquire_data(self):
         self.ready_event.wait()
         self.ready_event.clear()
-        data = self.buffer_ref[0].copy()
+        data = self.buffer_ref[0]['img']
         self.done_event.set()
         return data
 

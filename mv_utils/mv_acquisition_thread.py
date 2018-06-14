@@ -28,7 +28,7 @@ class AcquisitionThread(threading.Thread):
         #get image
         image_result = None
         try:
-            image_result = self.dev.get_image()
+            image_result = self.device.get_image()
         except mv.MVTimeoutError:
             print("timeout")
         except Exception as e:
@@ -37,7 +37,7 @@ class AcquisitionThread(threading.Thread):
         #pack image data together with metadata in a dict
         if image_result is not None:
             buf = image_result.get_buffer()
-            imgdata = np.array(buf, copy = False)
+            imgdata = np.array(buf, copy=False)
 
             info=image_result.info
             timestamp = info['timeStamp_us']
@@ -55,7 +55,7 @@ class AcquisitionThread(threading.Thread):
             start = time.time()
             image = self.acquire_image()
             if image is not None:
-                self.buffer_ref[0] = np.copy(image)
+                self.buffer_ref[0] = image
                 self.ready_event.set()
                 self.done_event.wait()
                 self.done_event.clear()

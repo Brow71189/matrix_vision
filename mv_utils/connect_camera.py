@@ -16,3 +16,4 @@ def get_camera_with_index(index):
     assert index < len(dev_list), 'Camera index {:d} is larger than number of available cameras ({:d})'.format(index, len(dev_list))
     dev_dict = dev_list[index]
     dev_dict['camera'] = mv.dmg.get_device(dev_dict['serial'])
+    return dev_dict
