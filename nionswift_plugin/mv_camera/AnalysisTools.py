@@ -22,10 +22,10 @@ class AverageIntensityMenuItem:
             if target_data_item is not None and target_data_item.display_xdata.is_datum_2d:
                 rect = target_data_item.add_rectangle_region(0.5, 0.5, 0.33, 0.33)
                 def update_rect_label(prop):
-                    if prop != 'label':
-                        mask = rect._graphic.get_mask(target_data_item.display_xdata.data.shape).astype(np.uint8)
-                        average = (np.sum(target_data_item.display_xdata.data*mask, axis=(0,1), dtype=np.float)/
-                                   np.count_nonzero(mask, axis=(0,1)))
+                    if prop == 'bounds':
+                        mask = rect._graphic.get_mask(target_data_item.display_xdata.data.shape)
+                        average = np.atleast_1d(np.sum(target_data_item.display_xdata.data*mask, axis=(0,1), dtype=np.float)/
+                                                np.count_nonzero(mask, axis=(0,1)))
                         label_string = 'Average intensity: '
                         if target_data_item.display_xdata.is_data_rgb:
                             label_string += '(R: {:g}, G: {:g}, B: {:g})'
@@ -33,11 +33,11 @@ class AverageIntensityMenuItem:
                         else:
                             label_string += '{:g}'
 
-                        rect.label = label_string.format(*tuple(average))
+                        rect.label = label_string.format(*average)
                 timestamp = str(time.time())
                 self.event_listeners[timestamp] = [rect._graphic.property_changed_event.listen(update_rect_label)]
                 self.event_listeners[timestamp].append(rect._graphic.about_to_be_removed_event.listen(lambda: self.event_listeners.pop(timestamp, 0)))
-                update_rect_label('size')
+                update_rect_label('bounds')
         except Exception as e:
             print(e)
 
