@@ -7,6 +7,8 @@ Created on Thu Jun 14 10:23:33 2018
 """
 
 import mv
+import configparser
+import os
 
 def list_devices():
     return mv.dmg.get_device_list()
@@ -22,4 +24,25 @@ def apply_default_settings(device):
     device.Setting.Base.ImageDestination.PixelFormat = 10
     device.Setting.Base.ImageProcessing.WhiteBalance = 6
     device.Setting.Base.ImageProcessing.WhiteBalanceCalibration = 0
-    
+    device.Setting.Base.ImageDestination.ScalerMode = 1
+    device.Setting.Base.ImageDestination.ScalerInterpolationMode = 0
+
+def apply_config_file_settings(device):
+    parser = configparser.ConfigParser()
+    parser.optionxform = lambda option: option #this is to disable conversion of option names to lowercase
+    config_path = os.path.expanduser('~/.config/matrix_vision/config.ini')
+    print('Loading Matrix Vision camera configuration from {}'.format(config_path))
+    if os.path.isfile(config_path):
+        parser.read(config_path)
+        sections = parser.sections()
+        for section in sections:
+            try:
+                sec = getattr(device.Setting.Base, section)
+            except AttributeError:
+                print('Settings section {} does not exist for this camera.'.format(section))
+            else:
+                for option in parser[section].keys():
+                    try:
+                        setattr(sec, option, parser.getint(section, option))
+                    except mv.MVError:
+                        print('Option {} in section {} does not exist for this camera.'.format(option, section))

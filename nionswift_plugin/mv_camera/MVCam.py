@@ -19,7 +19,7 @@ class VideoCamera:
     def __init__(self, camera_index):
         self.camera_index = camera_index
         self.device = connect_camera.get_camera_with_index(camera_index)['camera']
-        connect_camera.apply_default_settings(self.device)
+        connect_camera.apply_config_file_settings(self.device)
 
     def update_settings(self, settings: dict) -> None:
         camera_index = settings.get("camera_index", 0)
