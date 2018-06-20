@@ -42,6 +42,7 @@ class VideoCamera:
         self.ready_event.wait()
         self.ready_event.clear()
         data = self.buffer_ref[0]['img']
+        #print(self.device.Setting.Base.GenICam.AcquisitionControl.mvAcquisitionMemoryFrameCount, end='\r')
         self.done_event.set()
         return data
 

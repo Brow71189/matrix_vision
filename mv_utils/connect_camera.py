@@ -36,13 +36,15 @@ def apply_config_file_settings(device):
         parser.read(config_path)
         sections = parser.sections()
         for section in sections:
+            lastsec = device.Setting.Base
             try:
-                sec = getattr(device.Setting.Base, section)
+                for splitsec in section.split('.'):
+                    lastsec = getattr(lastsec, splitsec)
             except AttributeError:
                 print('Settings section {} does not exist for this camera.'.format(section))
             else:
                 for option in parser[section].keys():
                     try:
-                        setattr(sec, option, parser.getint(section, option))
+                        setattr(lastsec, option, parser.getint(section, option))
                     except mv.MVError:
                         print('Option {} in section {} does not exist for this camera.'.format(option, section))

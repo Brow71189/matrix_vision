@@ -4,8 +4,8 @@ import time
 
 import mv
 
-MAX_FRAME_RATE = 20  # frames per second
-MINIMUM_DUTY = 0.05  # seconds
+MAX_FRAME_RATE = 35  # frames per second
+MINIMUM_DUTY = 0.028  # seconds
 
 class AcquisitionThread(threading.Thread):
 
@@ -20,7 +20,7 @@ class AcquisitionThread(threading.Thread):
     def acquire_image(self):
         #try to submit 2 new requests -> queue always full
         try:
-            self.device.image_request()
+            #self.device.image_request()
             self.device.image_request()
         except mv.MVError as e:
             pass
@@ -58,11 +58,13 @@ class AcquisitionThread(threading.Thread):
             if image is not None:
                 self.buffer_ref[0] = image
                 self.ready_event.set()
-                self.done_event.wait()
-                self.done_event.clear()
                 elapsed = time.time() - start
                 delay = max(1.0/MAX_FRAME_RATE - elapsed, MINIMUM_DUTY)
-                self.cancel_event.wait(delay)
+                self.done_event.wait(delay)
+                self.done_event.clear()
+                #elapsed = time.time() - start
+                #delay = max(1.0/MAX_FRAME_RATE - elapsed, MINIMUM_DUTY)
+                #self.cancel_event.wait(delay)
             else:
                 self.buffer_ref[0] = None
                 self.ready_event.set()
