@@ -24,6 +24,7 @@ class PanelDelegate:
         self.exposure_time_line_edit = ui.create_line_edit_widget()
         self.auto_exposure_label = ui.create_label_widget(text='Auto ')
         self.auto_exposure_check_box = ui.create_check_box_widget()
+        self.auto_exposure_check_box.checked = True
 
         self.binning_label = ui.create_label_widget(text='Binning: ')
         self.binning_combo = ui.create_combo_box_widget(items=[1, 2, 4, 8], item_text_getter=item_text_getter)
@@ -100,12 +101,13 @@ class PanelDelegate:
                 self.exposure_time_line_edit.text = '{:g}'.format(self.__current_camera_settings.exposure_ms)
 
         def auto_exposure_changed(check_state):
+            self.__current_camera_settings.auto_exposure = self.auto_exposure_check_box.checked
+            
             if self.auto_exposure_check_box.checked:
                 self.exposure_time_line_edit._widget.enabled = False
             else:
                 self.exposure_time_line_edit._widget.enabled = True
-
-            self.__current_camera_settings.auto_exposure = self.auto_exposure_check_box.checked
+                exposure_changed(self.exposure_time_line_edit.text)
 
         def binning_changed(item):
             self.__current_camera_settings.binning = item

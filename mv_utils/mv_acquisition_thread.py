@@ -4,8 +4,8 @@ import time
 
 import mv
 
-MAX_FRAME_RATE = 35  # frames per second
-MINIMUM_DUTY = 0.028  # seconds
+MAX_FRAME_RATE = 20  # frames per second
+MINIMUM_DUTY = 0.05  # seconds
 
 class AcquisitionThread(threading.Thread):
 
@@ -20,7 +20,7 @@ class AcquisitionThread(threading.Thread):
     def acquire_image(self):
         #try to submit 2 new requests -> queue always full
         try:
-            #self.device.image_request()
+            self.device.image_request()
             self.device.image_request()
         except mv.MVError as e:
             pass
@@ -52,6 +52,8 @@ class AcquisitionThread(threading.Thread):
 
     def run(self):
         self.reset()
+        fpsstart = time.time()
+        counter = 0
         while not self.cancel_event.is_set():
             start = time.time()
             image = self.acquire_image()
@@ -67,7 +69,15 @@ class AcquisitionThread(threading.Thread):
                 #self.cancel_event.wait(delay)
             else:
                 self.buffer_ref[0] = None
-                self.ready_event.set()
+                #self.ready_event.set()
+            counter += 1
+            fpselapsed = time.time() - fpsstart
+            if fpselapsed > 0.5:
+                fpsstart = time.time()
+                #print('Read FPS: {:.0f}, Camera FPS: {:.0f}, Camera Buffer Size: {:.0f}'.format(counter/fpselapsed,
+                #                                                          self.device.Statistics.FramesPerSecond.value,
+                #             self.device.Setting.Base.GenICam.AcquisitionControl.mvAcquisitionMemoryFrameCount.value))
+                counter = 0
         self.reset()
 
     def stop(self):

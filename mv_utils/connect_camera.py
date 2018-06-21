@@ -50,7 +50,7 @@ def apply_config_file_settings(device):
                         print('Option {} in section {} does not exist for this camera.'.format(option, section))
 
 def get_sensor_size(device):
-    return (2056, 2646)
+    return (2056, 2464)
 
 def set_option(device, option_name, value):
     name_string = OPTION_DICT.get(option_name)
@@ -80,7 +80,8 @@ OPTION_DICT = {
     'ImageHeight': 'Setting.Base.ImageDestination.ImageHeight',
     'ImageWidth': 'Setting.Base.ImageDestination.ImageWidth',
     'FramesPerSecond': 'Statistics.FramesPerSecond',
-    'ImageProcTime_s': 'Statistics.ImageProcTime_s'
+    'ImageProcTime_s': 'Statistics.ImageProcTime_s',
+    'AcquisitionFrameRateEnable': 'Setting.Base.Camera.GenICam.AcquisitionControl.AcquisitionFrameRateEnable'
     }
 
 class CameraSettings:
@@ -116,6 +117,9 @@ class CameraSettings:
     @auto_exposure.setter
     def auto_exposure(self, auto):
         self._set_option('ExposureAuto', int(auto))
+#        if not self._get_option('AcquisitionFrameRateEnable'):
+#            self._set_option('AcquisitionFrameRateEnable', 1)
+#            self._set_option('AcquisitionFrameRateEnable', 0)
 
     @property
     def binning(self):
