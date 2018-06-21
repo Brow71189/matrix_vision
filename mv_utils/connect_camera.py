@@ -53,11 +53,23 @@ def get_sensor_size(device):
     return (2056, 2646)
 
 def set_option(device, option_name, value):
-    pass
+    name_string = OPTION_DICT.get(option_name)
+    assert name_string is not None, '{} is not a known option name!'.format(option_name)
+    split_name_string = name_string.split('.')
+    settings_object = device
+    for part in split_name_string:
+        settings_object = getattr(settings_object, part)
+    setattr(settings_object, 'value', value)
 
 def get_option(device, option_name):
-    value = None
-    return value
+    name_string = OPTION_DICT.get(option_name)
+    assert name_string is not None, '{} is not a known option name!'.format(option_name)
+    split_name_string = name_string.split('.')
+    settings_object = device
+    for part in split_name_string:
+        settings_object = getattr(settings_object, part)
+
+    return settings_object.value
 
 OPTION_DICT = {
     'WhiteBalance': 'Setting.Base.ImageProcessing.WhiteBalance',
@@ -76,19 +88,26 @@ class CameraSettings:
         self.__camera = device
 
     def _get_option(self, option_name):
-        return get_option(self.__camera)
+        try:
+            return get_option(self.__camera, option_name)
+        except (AttributeError, mv.MVError) as e:
+            print(e)
+            return 0
 
     def _set_option(self, option_name, value):
-        set_option(self.__camera, option_name, value)
+        try:
+            set_option(self.__camera, option_name, value)
+        except (AttributeError, mv.MVError) as e:
+            print(e)
 
     @property
     def exposure_ms(self):
-        return self._get_option('ExposureTime')
+        return self._get_option('ExposureTime')/1000
 
     @exposure_ms.setter
     def exposure_ms(self, exposure):
         if not self.auto_exposure:
-            self._set_option('ExposureTime', exposure)
+            self._set_option('ExposureTime', exposure*1000)
 
     @property
     def auto_exposure(self):

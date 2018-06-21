@@ -66,6 +66,7 @@ class VideoDeviceFactory:
             video_device = VideoCamera(camera_index)
             video_device.camera_id = settings.get("device_id")
             video_device.camera_name = settings.get("name")
+            video_device.driver_id = self.factory_id
             return video_device
         return None
 
