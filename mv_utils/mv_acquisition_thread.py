@@ -78,6 +78,8 @@ class AcquisitionThread(threading.Thread):
                 #                                                          self.device.Statistics.FramesPerSecond.value,
                 #             self.device.Setting.Base.GenICam.AcquisitionControl.mvAcquisitionMemoryFrameCount.value))
                 counter = 0
+                if hasattr(self, 'periodic_event'):
+                    self.periodic_event.fire()
         self.reset()
 
     def stop(self):

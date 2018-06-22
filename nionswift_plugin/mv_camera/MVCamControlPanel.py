@@ -102,11 +102,13 @@ class PanelDelegate:
 
         def auto_exposure_changed(check_state):
             self.__current_camera_settings.auto_exposure = self.auto_exposure_check_box.checked
-            
+
             if self.auto_exposure_check_box.checked:
                 self.exposure_time_line_edit._widget.enabled = False
+                self.__periodic_listener = self.__current_camera_device._hardware_source.video_device.device.periodic_event.listen(lambda: exposure_changed(''))
             else:
                 self.exposure_time_line_edit._widget.enabled = True
+                self.__periodic_listener = None
                 exposure_changed(self.exposure_time_line_edit.text)
 
         def binning_changed(item):
@@ -122,9 +124,8 @@ class PanelDelegate:
         self.exposure_time_line_edit.on_editing_finished = exposure_changed
 
         camera_changed(self.choose_camera_combo.current_item)
-        binning_changed(self.binning_combo.current_item)
-        magnification_changed(self.magnification_combo.current_item)
-        auto_exposure_changed(self.auto_exposure_check_box.check_state)
+        self.binning_combo.current_item = self.__current_camera_settings.binning
+        self.auto_exposure_check_box.checked = self.__current_camera_settings.auto_exposure
         exposure_changed('')
 
     def get_mv_cameras(self):

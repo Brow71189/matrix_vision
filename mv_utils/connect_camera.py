@@ -93,7 +93,7 @@ class CameraSettings:
             return get_option(self.__camera, option_name)
         except (AttributeError, mv.MVError) as e:
             print(e)
-            return 0
+            return 1
 
     def _set_option(self, option_name, value):
         try:

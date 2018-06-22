@@ -9,6 +9,7 @@ import typing
 from nion.ui import Declarative
 from nion.utils import Model
 from nion.utils import Registry
+from nion.utils import Event
 
 from mv_utils import mv_acquisition_thread, connect_camera
 
@@ -19,6 +20,7 @@ class VideoCamera:
     def __init__(self, camera_index):
         self.camera_index = camera_index
         self.device = connect_camera.get_camera_with_index(camera_index)['camera']
+        self.periodic_event = Event.Event()
         connect_camera.apply_config_file_settings(self.device)
 
     def update_settings(self, settings: dict) -> None:
@@ -35,6 +37,7 @@ class VideoCamera:
         self.done_event = threading.Event()
         self.thread = mv_acquisition_thread.AcquisitionThread(self.device, self.buffer_ref, self.cancel_event,
                                                               self.ready_event, self.done_event)
+        self.thread.periodic_event = self.periodic_event
         #self.thread = threading.Thread(target=video_capture_thread, args=(video_capture, self.buffer_ref, self.cancel_event, self.ready_event, self.done_event))
         self.thread.start()
 
@@ -42,9 +45,13 @@ class VideoCamera:
         self.ready_event.wait()
         self.ready_event.clear()
         data = self.buffer_ref[0]['img']
+        data_element = {
+                    'data': data,
+                    'spatial_calibrations': [{'units': 'µm'}, {'units': 'µm'}]
+                }
         #print(self.device.Setting.Base.GenICam.AcquisitionControl.mvAcquisitionMemoryFrameCount, end='\r')
         self.done_event.set()
-        return data
+        return data_element
 
     def stop_acquisition(self):
         self.cancel_event.set()
