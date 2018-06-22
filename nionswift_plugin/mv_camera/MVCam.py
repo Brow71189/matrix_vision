@@ -22,6 +22,7 @@ class VideoCamera:
         self.device = connect_camera.get_camera_with_index(camera_index)['camera']
         self.periodic_event = Event.Event()
         connect_camera.apply_config_file_settings(self.device)
+        self.spatial_calibrations = [{},{}]
 
     def update_settings(self, settings: dict) -> None:
         camera_index = settings.get("camera_index", 0)
@@ -47,7 +48,7 @@ class VideoCamera:
         data = self.buffer_ref[0]['img']
         data_element = {
                     'data': data,
-                    'spatial_calibrations': [{'units': 'µm'}, {'units': 'µm'}]
+                    'spatial_calibrations': self.spatial_calibrations
                 }
         #print(self.device.Setting.Base.GenICam.AcquisitionControl.mvAcquisitionMemoryFrameCount, end='\r')
         self.done_event.set()

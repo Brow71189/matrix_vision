@@ -9,6 +9,7 @@ Created on Thu Jun 14 10:23:33 2018
 import mv
 import configparser
 import os
+import json
 
 def list_devices():
     return mv.dmg.get_device_list()
@@ -20,6 +21,19 @@ def get_camera_with_index(index):
     dev_dict['camera'] = mv.dmg.get_device(dev_dict['serial'])
     return dev_dict
 
+def load_spatial_calibrations(camera_settings):
+    calibration_file_path = os.path.expanduser('~/.config/matrix_vision/{}.json'.format(camera_settings.camera_id))
+    if os.path.isfile(calibration_file_path):
+        print('Loading Matrix Vision spatial calibrations from {}'.format(calibration_file_path))
+        with open(calibration_file_path) as calibration_file:
+            calibration = json.load(calibration_file)
+            camera_settings.spatial_calibration_dict = calibration
+
+def save_spatial_calibrations(camera_settings):
+    calibration_file_path = os.path.expanduser('~/.config/matrix_vision/{}.json'.format(camera_settings.camera_id))
+    with open(calibration_file_path, 'w+') as calibration_file:
+        json.dump(camera_settings.spatial_calibration_dict, calibration_file)
+
 def apply_default_settings(device):
     device.Setting.Base.ImageDestination.PixelFormat = 10
     device.Setting.Base.ImageProcessing.WhiteBalance = 6
@@ -30,9 +44,9 @@ def apply_default_settings(device):
 def apply_config_file_settings(device):
     parser = configparser.ConfigParser()
     parser.optionxform = lambda option: option #this is to disable conversion of option names to lowercase
-    config_path = os.path.expanduser('~/.config/matrix_vision/config.ini')
-    print('Loading Matrix Vision camera configuration from {}'.format(config_path))
+    config_path = os.path.expanduser('~/.config/matrix_vision/{}.ini'.format(device.camera_id))
     if os.path.isfile(config_path):
+        print('Loading Matrix Vision camera configuration from {}'.format(config_path))
         parser.read(config_path)
         sections = parser.sections()
         for section in sections:
@@ -87,6 +101,8 @@ OPTION_DICT = {
 class CameraSettings:
     def __init__(self, device):
         self.__camera = device
+        self.camera_id = device.camera_id
+        self.spatial_calibrations_dict = dict()
 
     def _get_option(self, option_name):
         try:

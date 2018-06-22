@@ -89,6 +89,7 @@ class PanelDelegate:
                 settings = connect_camera.CameraSettings(self.__current_camera_device._hardware_source.video_device.device)
                 self.mv_cameras[index]['settings'] = settings
             self.__current_camera_settings = settings
+            connect_camera.load_spatial_calibrations(settings)
 
         def exposure_changed(text):
             try:
@@ -115,7 +116,8 @@ class PanelDelegate:
             self.__current_camera_settings.binning = item
 
         def magnification_changed(item):
-            pass
+            calib = self.__current_camera_settings.spatial_calibration_dict.get(str(item), dict())
+            self.__current_camera_device.spatial_calibrations = [calib, calib]
 
         self.choose_camera_combo.on_current_item_changed = camera_changed
         self.binning_combo.on_current_item_changed = binning_changed
