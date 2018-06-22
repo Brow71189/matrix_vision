@@ -41,16 +41,16 @@ def apply_default_settings(device):
     device.Setting.Base.ImageDestination.ScalerMode = 1
     device.Setting.Base.ImageDestination.ScalerInterpolationMode = 0
 
-def apply_config_file_settings(device):
+def apply_config_file_settings(video_device):
     parser = configparser.ConfigParser()
     parser.optionxform = lambda option: option #this is to disable conversion of option names to lowercase
-    config_path = os.path.expanduser('~/.config/matrix_vision/{}.ini'.format(device.camera_id))
+    config_path = os.path.expanduser('~/.config/matrix_vision/{}.ini'.format(video_device.camera_id))
     if os.path.isfile(config_path):
         print('Loading Matrix Vision camera configuration from {}'.format(config_path))
         parser.read(config_path)
         sections = parser.sections()
         for section in sections:
-            lastsec = device.Setting.Base
+            lastsec = video_device.device.Setting.Base
             try:
                 for splitsec in section.split('.'):
                     lastsec = getattr(lastsec, splitsec)
@@ -99,9 +99,9 @@ OPTION_DICT = {
     }
 
 class CameraSettings:
-    def __init__(self, device):
-        self.__camera = device
-        self.camera_id = device.camera_id
+    def __init__(self, video_device):
+        self.__camera = video_device.device
+        self.camera_id = video_device.camera_id
         self.spatial_calibrations_dict = dict()
 
     def _get_option(self, option_name):
@@ -139,7 +139,10 @@ class CameraSettings:
 
     @property
     def binning(self):
-        return round(get_sensor_size(self.__camera)[0]/self._get_option('ImageHeight'))
+        if self._get_option('ScalerMode'):
+            return round(get_sensor_size(self.__camera)[0]/self._get_option('ImageHeight'))
+        else:
+            return 1
 
     @binning.setter
     def binning(self, binning):

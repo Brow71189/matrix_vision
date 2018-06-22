@@ -21,7 +21,6 @@ class VideoCamera:
         self.camera_index = camera_index
         self.device = connect_camera.get_camera_with_index(camera_index)['camera']
         self.periodic_event = Event.Event()
-        connect_camera.apply_config_file_settings(self.device)
         self.spatial_calibrations = [{},{}]
 
     def update_settings(self, settings: dict) -> None:
@@ -75,6 +74,7 @@ class VideoDeviceFactory:
             video_device.camera_id = settings.get("device_id")
             video_device.camera_name = settings.get("name")
             video_device.driver_id = self.factory_id
+            connect_camera.apply_config_file_settings(video_device)
             return video_device
         return None
 

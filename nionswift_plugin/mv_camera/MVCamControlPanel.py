@@ -86,7 +86,7 @@ class PanelDelegate:
             index = self.choose_camera_combo.current_index
             self.__current_camera_device = self.__api.get_hardware_source_by_id(self.mv_cameras[index]['id'], '1')
             if not self.mv_cameras[index].get('settings'):
-                settings = connect_camera.CameraSettings(self.__current_camera_device._hardware_source.video_device.device)
+                settings = connect_camera.CameraSettings(self.__current_camera_device._hardware_source.video_device)
                 self.mv_cameras[index]['settings'] = settings
             self.__current_camera_settings = settings
             connect_camera.load_spatial_calibrations(settings)
@@ -114,10 +114,12 @@ class PanelDelegate:
 
         def binning_changed(item):
             self.__current_camera_settings.binning = item
+            magnification_changed(self.magnification_combo.current_item)
 
         def magnification_changed(item):
-            calib = self.__current_camera_settings.spatial_calibration_dict.get(str(item), dict())
-            self.__current_camera_device.spatial_calibrations = [calib, calib]
+            calib = self.__current_camera_settings.spatial_calibration_dict.get(str(item), dict()).copy()
+            calib['scale'] = calib['scale'] * self.__current_camera_settings.binning
+            self.__current_camera_device._hardware_source.video_device.spatial_calibrations = [calib, calib]
 
         self.choose_camera_combo.on_current_item_changed = camera_changed
         self.binning_combo.on_current_item_changed = binning_changed
@@ -130,6 +132,7 @@ class PanelDelegate:
         self.auto_exposure_check_box.checked = self.__current_camera_settings.auto_exposure
         auto_exposure_changed(self.auto_exposure_check_box.check_state)
         exposure_changed('')
+        magnification_changed(self.magnification_combo.current_item)
 
     def get_mv_cameras(self):
         hardware_sources = self.__api.get_all_hardware_source_ids()
