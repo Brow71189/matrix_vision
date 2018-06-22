@@ -105,7 +105,7 @@ class PanelDelegate:
 
             if self.auto_exposure_check_box.checked:
                 self.exposure_time_line_edit._widget.enabled = False
-                self.__periodic_listener = self.__current_camera_device._hardware_source.video_device.device.periodic_event.listen(lambda: exposure_changed(''))
+                self.__periodic_listener = self.__current_camera_device._hardware_source.video_device.periodic_event.listen(lambda: self.__api.queue_task(lambda: exposure_changed('')))
             else:
                 self.exposure_time_line_edit._widget.enabled = True
                 self.__periodic_listener = None
@@ -126,6 +126,7 @@ class PanelDelegate:
         camera_changed(self.choose_camera_combo.current_item)
         self.binning_combo.current_item = self.__current_camera_settings.binning
         self.auto_exposure_check_box.checked = self.__current_camera_settings.auto_exposure
+        auto_exposure_changed(self.auto_exposure_check_box.check_state)
         exposure_changed('')
 
     def get_mv_cameras(self):
